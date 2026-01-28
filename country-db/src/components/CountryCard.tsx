@@ -7,6 +7,8 @@ interface ICountryCard {
 }
 
 export const CountryCard = ({data, cardClickEvent}: ICountryCard) => {
+    console.log(data.name, data.flag);
+    
     const [pl, setPl] = useState(data.flag)
     
     return(
