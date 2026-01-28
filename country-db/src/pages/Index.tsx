@@ -2,7 +2,10 @@ import { Header } from "../components/Header"
 import { Bar } from "../components/Bar"
 import { useEffect, useState, type ChangeEvent} from "react"
 import { CountryList } from "../components/CountryList"
-import { Meta, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { ApiError, client } from "../api/api"
+import { LoadingView } from "../components/Loading"
+import { ErrorView } from "../components/ErrorView"
 
 export const REGIONS = ['Asia','Europe','Africa','Americas','Oceania','North America','South America'] as const
 export type TRegion = typeof REGIONS[number] | ''
@@ -34,6 +37,8 @@ export const Index = () => {
     const [filtCountries, setFiltCountries] = useState<IShortCountry[]>(countries)
     const [searchTxt, setSearchTxt] = useState('')
     const [filterStr, setFilterStr] = useState<TRegion>('')
+    const [error, setError] = useState<null | string>(null)
+    const [isLoading, setIsLoading] = useState(false)
 
     const navigate = useNavigate()
 
@@ -56,19 +61,26 @@ export const Index = () => {
 
     useEffect(() => {
         const getCountries = async () => {
+            setIsLoading(true)
             try {
-                const data = await fetch('https://countries-api-abhishek.vercel.app/countries')
-                const result = await data.json()
+                const response = await client.getCountries()
 
-                if(result.statusCode !== 200) throw new Error
+                if(response.statusCode == 200 && response.data){
+                    const shrim: ICountry[] = response.data.filter((el: ICountry) => el.name !== 'Xenocera')
+                    const filted = Array.from(new Set(shrim.map(el => JSON.stringify(el)))).map(str => JSON.parse(str))
 
-                const shrim: ICountry[] = result.data.filter((el: ICountry) => el.name !== 'Xenocera')
-
-                const filted = Array.from(new Set(shrim.map(el => JSON.stringify(el)))).map(str => JSON.parse(str))
-
-                setCountries(filted)
+                    setCountries(filted)
+                } else {
+                    setError(response.message)
+                }
             } catch (error) {
-                console.error(error);
+                if(error instanceof ApiError) {
+                    setError(error.message)
+                } else{
+                    setError('Unexpected error')
+                }
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -76,7 +88,6 @@ export const Index = () => {
     }, [])
 
     useEffect(() => {
-        
         if(filterStr !== '') setFiltCountries(countries.filter((el) => el.region == filterStr).filter((el) => el.name.search(searchTxt) >= 0))
         else setFiltCountries(countries.filter((el) => el.name.toLowerCase().search(searchTxt) >= 0))
 
@@ -91,7 +102,12 @@ export const Index = () => {
             {/* Bar filters & search*/}
             <Bar clickEvent={handleFilterClick} inputEvent={handleSearchChange} s_txt={searchTxt} />
             {/* Country List */}
-            <CountryList cardClickEvent={handleCardClick} data={filtCountries} />
+            {isLoading 
+            ? <LoadingView />
+            : error
+            ? <ErrorView />
+            : <CountryList cardClickEvent={handleCardClick} data={filtCountries}/> }
+            
         </div>
     )
 }
