@@ -226,6 +226,11 @@ body {
   padding: 10px;
   border-left: 3px solid #3498db;
   background-color: #f8f9fa;
+  transition: all .2s ease;
+  
+  &:hover{
+    transform: translateY(-.5rem);
+  }
 }
 
 .county-info .stats-info .country-population {
@@ -270,6 +275,22 @@ body {
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.back-button{
+  margin-bottom: 1.5rem;
+  margin-left: 2rem;
+  
+  span{
+    padding: 1rem;
+    color: gray;
+    cursor: pointer;
+    transition: all .2s ease;
+
+    &:hover{
+      color: #333;
+    }
+  }
 }
 
 @media (max-width: 768px) {

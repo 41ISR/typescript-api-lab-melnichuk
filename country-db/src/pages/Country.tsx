@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import type { ICountry } from "./Index"
+import { client } from "../api/api"
 
 export const Country = () => {
-    const {country} = useParams()
+    const {country = ''} = useParams()
     const [info, setInfo] = useState<ICountry>()
+    const navigate = useNavigate()
 
     const prettyNumbers = (num: number): string => {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
@@ -13,12 +15,9 @@ export const Country = () => {
     useEffect(() => {
         const guu = async () => {
             try {
-                const data = await fetch(`https://countries-api-abhishek.vercel.app/countries/${country}`)
-                const result = await data.json()
+                const data = await client.getCountry(country)
 
-                if(result.error) throw new Error(result.message)
-
-                setInfo(result.data)
+                setInfo(data.data)
             } catch (error) {
                 console.error(error);
             }
@@ -30,6 +29,9 @@ export const Country = () => {
     return(
         info &&(
             <div className="county-info">
+                <div className="back-button">
+                    <span onClick={() => navigate('/')} title="To the main page">⬅ Back</span>
+                </div>
                 <div className="main-info">
                     <div className="info-main">
                         <div className="country-name">{info.name}</div>
