@@ -6,12 +6,14 @@ import { useNavigate } from "react-router-dom"
 import { ApiError, client } from "../api/api"
 import { LoadingView } from "../components/Loading"
 import { ErrorView } from "../components/ErrorView"
+import { nanoid } from "nanoid"
 
 export const REGIONS = ['Asia','Europe','Africa','Americas','Oceania','North America','South America'] as const
 export type TRegion = typeof REGIONS[number] | ''
 
 
 export interface ICountry {
+    id?: string,
     "name": string,
     "capital": string,
     "region": string,
@@ -29,7 +31,7 @@ export interface ICountry {
     "flag": string
 }
 
-export type IShortCountry = Pick<ICountry, 'name' | 'region' | 'flag' >
+export type IShortCountry = Pick<ICountry, 'name' | 'region' | 'flag' | "id" >
 
 
 export const Index = () => {
@@ -68,8 +70,11 @@ export const Index = () => {
                 if(response.statusCode == 200 && response.data){
                     const shrim: ICountry[] = response.data.filter((el: ICountry) => el.name !== 'Xenocera')
                     const filted = Array.from(new Set(shrim.map(el => JSON.stringify(el)))).map(str => JSON.parse(str))
-
-                    setCountries(filted)
+                    
+                    const countries_list: ICountry[] = filted.map((el) => {
+                        return {...el, id: nanoid()}
+                    })
+                    setCountries(countries_list)
                 } else {
                     setError(response.message)
                 }

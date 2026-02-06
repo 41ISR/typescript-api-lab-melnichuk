@@ -11,8 +11,8 @@ export const CountryList = ({data, cardClickEvent}: ICountryList) => {
 
     return(
         <div className="country-list">
-            {data.map((el, index) => (
-                <CountryCard key={index} data={el} cardClickEvent={cardClickEvent} /> 
+            {data.map((el) => (
+                <CountryCard key={el.id} data={el} cardClickEvent={cardClickEvent} /> 
             ))}
         </div>
     )
